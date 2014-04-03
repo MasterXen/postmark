@@ -1,62 +1,89 @@
-var async = require('async'),
-	keystone = require('keystone');
+var _ = require('underscore'),
+  async = require('async'),
+	keystone = require('keystone'),
+  geolib = require('geolib');
 
-var Meetup = keystone.list('Meetup'),
-	RSVP = keystone.list('RSVP'),
-	User = keystone.list('User'),
-	Post = keystone.list('Post');
+var Fence = keystone.list('Geofence');
+
+/*
+ * When the user is the below distance away from the center point
+ * of a fence, it is safe to send a teaser message
+ */
+var TEASER_DISTANCE_FROM_FENCE_IN_KM = 5000;
+
+/*
+ * When the user is the below distance away from the center point
+ * of a fence, it is safe to send assume a fence has been breached
+ */
+var ASSUME_INSIDE_DISTANCE_FROM_FENCE_IN_KM = 1000;
 
 exports = module.exports = function(req, res) {
 
-	var stats = {};
+  var latitude = req.params.latitude;
+  var longitude = req.params.longitude;
 
-	async.parallel([
+  Fence.paginate({
+    page: 1,
+    perPage: 100
+  }).exec(function(err, fences) {
+      //console.dir(fences);
 
-		function(next) {
+      if (err) {
+        res.send(500, "Error fetching list of available fences");
+        return;
+      } else {
+        if (fences.total == 0) {
+          res.send(404, "No fences available");
+          return;
+        }
 
-			Meetup.model.findOne()
-				.where('date').gte(moment().startOf('day').toDate())
-				.where('state', 'published')
-				.sort('date')
-				.exec(function(err, meetup) {
+        var marked = categorizeAndMarkFences(fences.results);
+        var final = cleanupFences(marked);
 
-					RSVP.model.count({
-						meetup: meetup,
-						attending: true
-					})
-					.exec(function(err, count) {
-						stats.rsvps = count;
-						return next();
-					});
+        res.send(final);
+      }
+  });
 
-				});
+  // Mark the fences
+  function categorizeAndMarkFences(fences) {
+    var reduced = _.map(fences, function(fence) {
+        var withinTeaser = geolib.isPointInCircle(
+          { latitude: latitude, longitude: longitude },
+          { latitude: fence.latitude, longitude: fence.longitude },
+          TEASER_DISTANCE_FROM_FENCE_IN_KM
+        );
 
-		},
+        var withinStore = geolib.isPointInCircle(
+          { latitude: latitude, longitude: longitude },
+          { latitude: fence.latitude, longitude: fence.longitude },
+          ASSUME_INSIDE_DISTANCE_FROM_FENCE_IN_KM
+        );
 
-		function(next) {
+        if (!withinStore && !withinTeaser) {
+          fence._removed = true;
+          console.warn("Removing " + fence._id);
+        } else if (!withinStore && withinTeaser) {
+          console.warn("IsTeaser " + true);
+          fence.isTeaser = true;
+        } else if (withinStore && withinTeaser) {
+          console.warn("IsTeaser " + false);
+          fence = _.extend(fence, {'isTeaser': false});
+          //fence.isTeaser = false;
+        }
 
-			User.model.count()
-				.exec(function(err, count) {
-					stats.members = count;
-					return next();
-				});
+        console.log(fence);
+        return fence;
+    });
 
-		},
+    return reduced;
+  }
 
-		function(next) {
+  function cleanupFences(fences) {
+    var reduced = _.reject(fences, function(fence) {
+      return fence._removed === true;
+    });
 
-			Post.model.count()
-				.exec(function(err, count) {
-					stats.posts = count;
-					return next();
-				});
+    return reduced;
+  }
 
-		}
-
-	], function(err) {
-
-		return res.apiResponse(stats);
-
-	});
-
-}
+};

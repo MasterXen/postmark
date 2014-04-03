@@ -41,7 +41,7 @@ exports = module.exports = function(app) {
 
   // API
 	app.all('/api*', keystone.initAPI);
-	app.all('/api/nearby', routes.api.nearby);
+	app.all('/api/nearby/:latitude/:longitude', routes.api.nearby);
 
 	// NOTE: To protect a route so that only admins can see it, use the requireUser middleware:
 	// app.get('/protected', middleware.requireUser, routes.views.protected);

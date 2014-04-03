@@ -10,26 +10,26 @@ var keystone = require('keystone');
 // and documentation.
 
 keystone.init({
-	
+
 	'name': 'Postmark',
 	'brand': 'Postmark',
-	
+
 	'less': 'public',
 	'static': 'public',
 	'favicon': 'public/favicon.ico',
-	
+
 	'views': 'templates/views',
 	'view engine': 'jade',
-	
+
 	'emails': 'templates/emails',
-	
+
 	'auto update': true,
-	
+
 	'session': true,
 	'auth': true,
 	'user model': 'User',
 	'cookie secret': 'XexA(7t5OW4e<B#<!isc91Z~%0X[`2&huepF7"W<kg.@:AkE;">=kubd;1n%B*1c'
-	
+
 });
 
 // Load your project's Models

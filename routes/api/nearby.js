@@ -40,6 +40,7 @@ exports = module.exports = function(req, res) {
         var marked = categorizeAndMarkFences(fences.results);
         var final = cleanupFences(marked);
 
+        res.setHeader('Content-Type', 'application/json');
         res.send(final);
       }
   });
@@ -67,11 +68,9 @@ exports = module.exports = function(req, res) {
           fence.isTeaser = true;
         } else if (withinStore && withinTeaser) {
           console.warn("IsTeaser " + false);
-          fence = _.extend(fence, {'isTeaser': false});
-          //fence.isTeaser = false;
+          fence.isTeaser = false;
         }
-
-        console.log(fence);
+        
         return fence;
     });
 
@@ -80,7 +79,7 @@ exports = module.exports = function(req, res) {
 
   function cleanupFences(fences) {
     var reduced = _.reject(fences, function(fence) {
-      return fence._removed === true;
+      return (fence._removed === true || fence.isInactive === true);
     });
 
     return reduced;

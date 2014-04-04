@@ -16,7 +16,7 @@ exports = module.exports = function(req, res) {
     PAGE++;
   }
 
-  // Create a single geofence that has a harcoded lat/long for testing
+  // Create a FIRST geofence that has a harcoded lat/long for testing
   var h = new Fence.model({
     name: "Macy's - North Central Mall",
     retailer: "Macy's",
@@ -27,6 +27,20 @@ exports = module.exports = function(req, res) {
   });
 
   h.save(function (error) {
+    if (error) throw ("Unable to save: " + error);
+  });
+
+  // Create a SECOND geofence that has a harcoded lat/long for testing
+  var j = new Fence.model({
+    name: "Macy's - Bee Cave",
+    retailer: "Macy's",
+    isInactive: false,
+    latitude: '30.3557437',
+    longitude: '-97.7129443',
+    discountPct: Math.floor(Math.random()*(30-10+1)+10)
+  });
+
+  j.save(function (error) {
     if (error) throw ("Unable to save: " + error);
   });
 

@@ -4,7 +4,9 @@ var _ = require('underscore'),
 
 var Fence = keystone.list('Geofence');
 
-var MASHERY_BBY_STORE_API_ENDPOINT = "http://api.remix.bestbuy.com/v1/stores(region='TX')?format=json&apiKey=3kvmawf6w6z9y4zwqdzd63rm&page=";
+var MASHERY_API_KEY = "3kvmawf6w6z9y4zwqdzd63rm";
+var MASHERY_BBY_STORE_API_ENDPOINT = "http://api.remix.bestbuy.com/v1/stores(region='TX')?format=json&apiKey=" + MASHERY_API_KEY + "&page=";
+
 
 exports = module.exports = function(req, res) {
 
@@ -54,7 +56,7 @@ exports = module.exports = function(req, res) {
       results = JSON.parse(body);
 
       if (results == null || results.stores == null) {
-        throw new Error"Unable to fetch store details (PAGE#" + PAGE + ")";
+        throw new Error("Unable to fetch store details (PAGE#" + PAGE + ")");
       }
 
       _.each(results.stores, function(store) {

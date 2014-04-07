@@ -27,7 +27,7 @@ exports = module.exports = function(req, res) {
   });
 
   h.save(function (error) {
-    if (error) throw ("Unable to save: " + error);
+    if (error) throw new Error("Unable to save: " + error);
   });
 
   // Create a SECOND geofence that has a harcoded lat/long for testing
@@ -41,7 +41,7 @@ exports = module.exports = function(req, res) {
   });
 
   j.save(function (error) {
-    if (error) throw ("Unable to save: " + error);
+    if (error) throw new Error("Unable to save: " + error);
   });
 
   res.send("Ok");
@@ -54,7 +54,7 @@ exports = module.exports = function(req, res) {
       results = JSON.parse(body);
 
       if (results == null || results.stores == null) {
-        throw "Unable to fetch store details (PAGE#" + PAGE + ")";
+        throw new Error"Unable to fetch store details (PAGE#" + PAGE + ")";
       }
 
       _.each(results.stores, function(store) {
@@ -74,7 +74,7 @@ exports = module.exports = function(req, res) {
         });
 
         o.save(function (error) {
-          if (error) throw ("Unable to save: " + error);
+          if (error) throw new Error("Unable to save: " + error);
         });
 
       });

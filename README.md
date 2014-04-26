@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/masterxen/postmark.png?label=ready&title=Ready)](https://waffle.io/masterxen/postmark)
 Postmark
 ===================
 
